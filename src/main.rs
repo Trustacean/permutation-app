@@ -1,6 +1,5 @@
 use permutation_app::*;
 use std::collections::HashSet;
-use std::fmt;
 
 fn main() {
     let nrof_males = 3;
