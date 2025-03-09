@@ -25,17 +25,3 @@ fn main() {
         println!("Permutation {}: {:?}", i + 1, permutation);
     }
 }
-
-enum PermutationError {
-    PopulationLargerThanChairs,
-}
-
-impl fmt::Debug for PermutationError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            PermutationError::PopulationLargerThanChairs => {
-                write!(f, "Population is larger than the number of chairs")
-            }
-        }
-    }
-}
