@@ -33,6 +33,54 @@ pub fn create_population(nrof_males: i32, nrof_females: i32) -> Vec<Individual> 
     population
 }
 
+pub fn free_permutations(population: &[Individual]) -> Vec<Vec<&Individual>> {
+    let pop_size = population.len();
+    let permutations = Arc::new(Mutex::new(Vec::new()));
+    let mut handles = Vec::new();
+
+    // Divide the work into chunks (e.g., one chunk per thread)
+    let num_threads = 16; // Adjust based on your CPU cores
+    let chunk_size = pop_size / num_threads;
+
+    for thread_id in 0..num_threads {
+        let permutations = Arc::clone(&permutations);
+
+        let handle = thread::spawn(move || {
+            let mut local_permutations = Vec::new();
+            let start = thread_id * chunk_size;
+            let end = if thread_id == num_threads - 1 {
+                pop_size
+            } else {
+                (thread_id + 1) * chunk_size
+            };
+
+            for i in start..end {
+                let mut permutation = Vec::new();
+                let used = 1 << i;
+                permutation.push(i);
+                free_permute(pop_size, &mut permutation, used, &mut local_permutations);
+            }
+
+            let mut global_permutations = permutations.lock().unwrap();
+            global_permutations.extend(local_permutations);
+        });
+
+        handles.push(handle);
+    }
+
+    // Wait for all threads to finish
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    // Convert indices to references to individuals
+    let permutations = Arc::try_unwrap(permutations).unwrap().into_inner().unwrap();
+    permutations
+        .into_iter()
+        .map(|perm_indices| perm_indices.iter().map(|&idx| &population[idx]).collect())
+        .collect()
+}
+
 pub fn free_permute(
     pop_size: usize,
     permutation: &mut Vec<usize>,
