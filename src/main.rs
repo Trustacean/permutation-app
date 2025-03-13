@@ -11,10 +11,13 @@ fn main() {
 
     let permutations = free_permutations(&population);
 
+    let elapsed_time = start_time.elapsed();
+
     for (i, perm) in permutations.iter().enumerate() {
         println!("Permutation {}: {:?}", i + 1, perm);
     }
 
+    println!("Elapsed time (Without Print): {:?}", elapsed_time);
     let elapsed_time = start_time.elapsed();
-    println!("Elapsed time: {:?}", elapsed_time);
+    println!("Elapsed time (With Print): {:?}", elapsed_time);
 }
