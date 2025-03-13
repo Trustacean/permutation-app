@@ -1,44 +1,57 @@
-use std::collections::HashSet;
+use std::{
+    fmt,
+    sync::{Arc, Mutex},
+    thread,
+};
 
-pub fn create_population(nrof_males: i32, nrof_females: i32) -> Vec<String> {
-    let mut population: Vec<String> = Vec::new();
+#[derive(Clone)]
+pub enum Individual {
+    Male(u32),
+    Female(u32),
+}
+
+impl fmt::Debug for Individual {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Male(i) => write!(f, "M{}", i),
+            Self::Female(i) => write!(f, "F{}", i),
+        }
+    }
+}
+
+pub fn create_population(nrof_males: i32, nrof_females: i32) -> Vec<Individual> {
+    let mut population: Vec<Individual> = Vec::new();
 
     for i in 0..nrof_males {
-        population.push(format!("M{}", i + 1));
+        population.push(Individual::Male((i as u32) + 1));
     }
 
     for i in 0..nrof_females {
-        population.push(format!("F{}", i + 1));
+        population.push(Individual::Female((i as u32) + 1));
     }
 
     population
 }
 
 pub fn free_permute(
-    population: &[String],
-    nrof_chairs: usize,
-    permutation: &mut Vec<String>,
-    used: &mut HashSet<usize>,
-    permutations: &mut Vec<Vec<String>>,
+    pop_size: usize,
+    permutation: &mut Vec<usize>,
+    used: u32,
+    permutations: &mut Vec<Vec<usize>>,
 ) {
     // If the permutation is already full, add it to the list of permutations
-    if permutation.len() == nrof_chairs {
+    if permutation.len() == pop_size {
         permutations.push(permutation.clone());
         return;
     }
 
-    for (i, person) in population.iter().enumerate() {
-        if !used.contains(&i) {
+    for i in 0..pop_size {
+        if (used & (1 << i)) == 0 {
             // Mark the person as used
-            used.insert(i);
-            permutation.push(person.clone());
-
-            // Recurse
-            free_permute(population, nrof_chairs, permutation, used, permutations);
-
+            permutation.push(i);
+            free_permute(pop_size, permutation, used | (1 << i), permutations);
             // Backtrack
             permutation.pop();
-            used.remove(&i);
         }
     }
 }
