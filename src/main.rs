@@ -1,26 +1,20 @@
 use permutation_app::*;
-use std::collections::HashSet;
+use std::time::Instant;
 
 fn main() {
-    let nrof_males = 3;
-    let nrof_felames = 2;
-    let nrof_chairs = 5;
+    let start_time = Instant::now();
 
-    let population = create_population(nrof_males, nrof_felames);
+    let nrof_males = 5;
+    let nrof_females = 4;
 
-    let mut permutations: Vec<Vec<String>> = Vec::new();
-    let mut permutation = Vec::new();
-    let mut used = HashSet::new();
+    let population = create_population(nrof_males, nrof_females);
 
-    free_permute(
-        &population,
-        nrof_chairs,
-        &mut permutation,
-        &mut used,
-        &mut permutations,
-    );
+    let permutations = free_permutations(&population);
 
-    for (i, permutation) in permutations.iter().enumerate() {
-        println!("Permutation {}: {:?}", i + 1, permutation);
+    for (i, perm) in permutations.iter().enumerate() {
+        println!("Permutation {}: {:?}", i + 1, perm);
     }
+
+    let elapsed_time = start_time.elapsed();
+    println!("Elapsed time: {:?}", elapsed_time);
 }
